@@ -6,24 +6,47 @@
 function initWebsocketConnection(onmessage, updateListenerObj, onopen, onerror, onclose)
 {
 	//create a new WebSocket object.
-	var wsUri = "ws://bbean.us:9000/demo/server.php"; 	
-	websocket = new WebSocket(wsUri); 
+	var wsUri = "ws://bbean.us:8080/small/cameraControl/communication.php"; 	
+	websocket = new WebSocket(wsUri);
+	var myId = Math.floor(Math.random() * 10000);
+	var lastSendTime = 0;
+	var lastTime = 0;
+	var index = 0;
 	
 	if (onopen)
 	{
 		websocket.onopen = onopen;
 	}
 
+	window.addEventListener("beforeunload", function (e) {
+		websocket.close(1000, "window close");
+	});
+
 	updateListenerObj.changed = function(pan, tilt)
 	{
+		// create a new random message id
+		
+		var time = (new Date()).getTime();
+		if (time - lastSendTime < 400 && time - lastTime < 100)
+		{
+			return;
+		}
+		lastSendTime = time;
+		lastTime = time;
+
 		//prepare json data
 		var msg = {
 			pan: pan,
 			tilt: tilt,
-			remote : false
+			remote : false,
+			clientId: myId,
+			messageIndex : index
 		};
+		index += 1;
 		//convert and send data to server
-		websocket.send(JSON.stringify(msg));
+		var data = JSON.stringify(msg);
+		console.log(data);
+		websocket.send(data);
 	};
 	
 	//#### Message received from server?
@@ -32,6 +55,19 @@ function initWebsocketConnection(onmessage, updateListenerObj, onopen, onerror, 
 		var pan = msg.pan;
 		var tilt = msg.tilt;
 		var remote = msg.remote;
+		var messageIndex = msg.messageIndex;
+		var clientId = msg.clientId;
+
+		if (clientId == myId)
+		{
+			return;
+		}
+		var time = (new Date()).getTime();
+		if (time - lastTime < 100)
+		{
+			return;
+		}
+		lastTime = time;
 
 		onmessage(pan, tilt, remote);
 	};
