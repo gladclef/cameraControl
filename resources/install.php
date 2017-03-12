@@ -48,7 +48,7 @@ class ProjectInstaller {
 	 */
 	public function check_jquery_path_validity() {
 		global $global_path_to_jquery;
-		return file_exists(dirname(__FILE__) . "/../" . $root . "$global_path_to_jquery");
+		return file_exists(dirname(__FILE__) . "/../../../$global_path_to_jquery");
 	}
 	/**
 	 * Checks for the existance of tables (and table columns) in the database and

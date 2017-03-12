@@ -3,13 +3,13 @@ require_once(dirname(__FILE__)."/debug.php");
 define_global_vars();
 require_once(dirname(__FILE__)."/common_functions.php");
 require_once(dirname(__FILE__)."/../objects/user.php");
-require_once(dirname(__FILE__)."/../root.php");
 function define_global_vars() {
 	global $maindb;
 	global $global_user;
 	global $global_opened_db;
 	global $session_started;
 	global $global_path_to_jquery;
+	global $global_path_to_d3;
 	global $tab_init_function;
 	global $global_loaded_server_settings;
 	global $mysqli;
@@ -41,6 +41,11 @@ function define_global_vars() {
 		$global_path_to_jquery = $a_configs["global_path_to_jquery"];
 	} else {
 		print_debug_as_html_paragraph("global_path_to_jquery is not set in server_config.ini");
+	}
+	if (isset($a_configs["global_path_to_d3"])) {
+		$global_path_to_d3 = $a_configs["global_path_to_d3"];
+	} else {
+		print_debug_as_html_paragraph("global_path_to_d3 is not set in server_config.ini");
 	}
 	if (isset($a_configs["timezone"])) {
 		date_default_timezone_set($a_configs["timezone"]);

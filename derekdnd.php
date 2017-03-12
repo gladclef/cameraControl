@@ -25,7 +25,7 @@ function getVals()
 	global $maindb;
 
 	$where = ["name"=>"${cameraName}"];
-	return db_query("SELECT `pan`,`tilt`,`pan_range`,`tilt_range` FROM `${maindb}`.`cameras` WHERE " . array_to_where_clause($where), $where);
+	return db_query("SELECT `pan`,`tilt`,`pan_range`,`tilt_range`,`remote_pan`,`remote_tilt` FROM `${maindb}`.`cameras` WHERE " . array_to_where_clause($where), $where);
 }
 
 function printAll()
@@ -37,15 +37,42 @@ function printAll()
 	}
 }
 
-function setPanAndTilt($pan, $tilt)
+function printAsJSON()
+{
+	$panTiltAndRange = getVals()[0];
+	echo json_encode($panTiltAndRange);
+}
+
+function setPanAndTilt($pan, $tilt, $remote = FALSE)
 {
 	global $maindb;
 	global $cameraName;
 
-	$updates = ["pan"=>$pan, "tilt"=>$tilt];
+	// make sure the values don't exceed the limiting range values
+	$panTiltAndRange = getVals()[0];
+	$pan = (int)$pan;
+	$tilt = (int)$tilt;
+	$pan_range = (int)$panTiltAndRange["pan_range"];
+	$tilt_range = (int)$panTiltAndRange["tilt_range"];
+	$pan = min(max($pan, -$pan_range), $pan_range);
+	$tilt = min(max($tilt, -$tilt_range), $tilt_range);
+
+	// get the variable names
+	$originalUpdates = ["pan"=>$pan, "tilt"=>$tilt];
+	$updates = array();
+	foreach ($originalUpdates as $k=>$v)
+	{
+		if ($remote)
+		{
+			$k = "remote_${k}";
+		}
+		$updates[$k] = $v;
+	}
+
+	// update the variables
 	$where = ["name"=>"${cameraName}"];
 	$combined = array_merge($where, $updates);
-	return db_query("UPDATE `${maindb}`.`cameras` SET " . array_to_update_clause($updates) . " WHERE " . array_to_where_clause($where), $combined, TRUE);
+	return db_query("UPDATE `${maindb}`.`cameras` SET " . array_to_update_clause($updates) . " WHERE " . array_to_where_clause($where), $combined);
 }
 
 ?>
