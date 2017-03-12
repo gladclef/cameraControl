@@ -2,6 +2,8 @@ var canvas;
 var crosshairs;
 var windowFocus = true;
 var mouseDown;
+var incomingMessenger;
+var outgoingMessenger;
 
 function initWatchers()
 {
@@ -123,6 +125,56 @@ function initCrosshairs()
 	crosshairs.updateImagePosition();
 }
 
+function update(e)
+{
+	var x = e.clientX || e.pageX;
+	var y = e.clientY || e.pageY;
+	crosshairs.updatePanTiltByPixel(x, y);
+	crosshairs.updateImagePosition();
+	crosshairs.updateRemoteCrosshairs(serverStats["remotePan"], serverStats["remoteTilt"]);
+}
+
+function localUpdate(e)
+{
+	
+}
+
+function initIncomingMessenger()
+{
+	incomingMessenger = function(pan, tilt, remote)
+	{
+		if (remote)
+		{
+			serverStats["remotePan"] = pan;
+			serverStats["remoteTilt"] = tilt;
+			update({
+				clientX: crosshairs.getX(crosshairs.pan),
+				clientY: crosshairs.getY(crosshairs.tilt)
+			});
+		}
+		else
+		{
+			serverStats["pan"] = pan;
+			serverStats["tilt"] = tilt;
+			update({
+				clientX: crosshairs.getX(pan),
+				clientY: crosshairs.getY(tilt)
+			});
+		}
+	}	
+}
+
+function initOutgoingMessenger()
+{
+	var update1 = update;
+	outgoingMessenger = {};
+	update = function(e)
+	{
+		update1(e);
+		outgoingMessenger.changed(crosshairs.pan, crosshairs.tilt);
+	}
+}
+
 var delayInit;
 delayInit = function()
 {
@@ -131,15 +183,11 @@ delayInit = function()
 		initCanvas();
 		initCrosshairs();
 		initWatchers();
+		initIncomingMessenger();
+		initOutgoingMessenger();
 
-		var update = function(e)
-		{
-			var x = e.clientX || e.pageX;
-			var y = e.clientY || e.pageY;
-			crosshairs.updatePanTiltByPixel(x, y);
-			crosshairs.updateImagePosition();
-			crosshairs.updateRemoteCrosshairs(remotePan, remoteTilt);
-		}
+		initWebsocketConnection(incomingMessenger, outgoingMessenger);
+
 		canvas.click(function(e) {
 			update(e);
 		});

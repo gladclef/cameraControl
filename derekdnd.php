@@ -25,12 +25,15 @@ function getVals()
 	global $maindb;
 
 	$where = ["name"=>"${cameraName}"];
-	return db_query("SELECT `pan`,`tilt`,`pan_range`,`tilt_range`,`remote_pan`,`remote_tilt` FROM `${maindb}`.`cameras` WHERE " . array_to_where_clause($where), $where);
+	$retval = db_query("SELECT `pan`,`tilt`,`pan_range`,`tilt_range`,`remote_pan`,`remote_tilt` FROM `${maindb}`.`cameras` WHERE " . array_to_where_clause($where), $where);
+	$retval = $retval[0];
+	$retval["name"] = $cameraName;
+	return $retval;
 }
 
 function printAll()
 {
-	$panTiltAndRange = getVals()[0];
+	$panTiltAndRange = getVals();
 	foreach ($panTiltAndRange as $k=>$v)
 	{
 		echo "${k}:${v}<br/>";
@@ -39,7 +42,7 @@ function printAll()
 
 function printAsJSON()
 {
-	$panTiltAndRange = getVals()[0];
+	$panTiltAndRange = getVals();
 	echo json_encode($panTiltAndRange);
 }
 
@@ -49,7 +52,7 @@ function setPanAndTilt($pan, $tilt, $remote = FALSE)
 	global $cameraName;
 
 	// make sure the values don't exceed the limiting range values
-	$panTiltAndRange = getVals()[0];
+	$panTiltAndRange = getVals();
 	$pan = (int)$pan;
 	$tilt = (int)$tilt;
 	$pan_range = (int)$panTiltAndRange["pan_range"];
