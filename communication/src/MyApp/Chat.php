@@ -30,12 +30,14 @@ class Chat implements MessageComponentInterface {
             , $from->resourceId, $msg, $numRecv, $numRecv == 1 ? '' : 's');
 
         $var = json_decode($msg);
-        setPanAndTilt($var->pan, $var->tilt, $var->remote);
+        $sanitizedValues = setPanAndTilt($var->pan, $var->tilt, $var->remote);
+        $updatedValues = array_merge($sanitizedValues, ["clientId"=>$var->clientId, "messageIndex"=>$var->messageIndex]);
+        $updatedMsg = json_encode($updatedValues);
 
         foreach ($this->clients as $client) {
             if ($from !== $client) {
                 // The sender is not the receiver, send to each client connected
-                $client->send($msg);
+                $client->send($updatedMsg);
             }
         }
     }

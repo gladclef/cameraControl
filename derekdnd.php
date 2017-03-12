@@ -61,9 +61,9 @@ function setPanAndTilt($pan, $tilt, $remote = FALSE)
 	$tilt = min(max($tilt, -$tilt_range), $tilt_range);
 
 	// get the variable names
-	$originalUpdates = ["pan"=>$pan, "tilt"=>$tilt];
+	$sanitized = ["pan"=>$pan, "tilt"=>$tilt];
 	$updates = array();
-	foreach ($originalUpdates as $k=>$v)
+	foreach ($sanitized as $k=>$v)
 	{
 		if ($remote)
 		{
@@ -75,7 +75,11 @@ function setPanAndTilt($pan, $tilt, $remote = FALSE)
 	// update the variables
 	$where = ["name"=>"${cameraName}"];
 	$combined = array_merge($where, $updates);
-	return db_query("UPDATE `${maindb}`.`cameras` SET " . array_to_update_clause($updates) . " WHERE " . array_to_where_clause($where), $combined);
+	db_query("UPDATE `${maindb}`.`cameras` SET " . array_to_update_clause($updates) . " WHERE " . array_to_where_clause($where), $combined);
+
+	// return the sanitized values
+	$sanitized["remote"] = $remote;
+	return $sanitized;
 }
 
 ?>

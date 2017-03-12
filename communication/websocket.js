@@ -6,7 +6,7 @@
 function initWebsocketConnection(onmessage, updateListenerObj, onopen, onerror, onclose)
 {
 	//create a new WebSocket object.
-	var wsUri = "ws://bbean.us:8080/small/cameraControl/communication.php"; 	
+	var wsUri = "ws://bbean.us:8080"; 	
 	websocket = new WebSocket(wsUri);
 	var myId = Math.floor(Math.random() * 10000);
 	var lastSendTime = 0;
