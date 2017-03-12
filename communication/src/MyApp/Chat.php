@@ -8,6 +8,8 @@ namespace MyApp;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 
+require_once(dirname(__FILE__) . "/../../../derekdnd.php");
+
 class Chat implements MessageComponentInterface {
     protected $clients;
 
@@ -26,6 +28,9 @@ class Chat implements MessageComponentInterface {
         $numRecv = count($this->clients) - 1;
         echo sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n"
             , $from->resourceId, $msg, $numRecv, $numRecv == 1 ? '' : 's');
+
+        $var = json_decode($msg);
+        setPanAndTilt($var->pan, $var->tilt, $var->remote);
 
         foreach ($this->clients as $client) {
             if ($from !== $client) {
