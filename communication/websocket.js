@@ -10,8 +10,9 @@ function initWebsocketConnection(onmessage, updateListenerObj, onopen, onerror, 
 	websocket = new WebSocket(wsUri);
 	var myId = Math.floor(Math.random() * 10000);
 	var lastSendTime = 0;
-	var lastTime = 0;
 	var index = 0;
+	var sendRate = 200;
+	var delayedUpdated = null;
 	
 	if (onopen)
 	{
@@ -27,12 +28,15 @@ function initWebsocketConnection(onmessage, updateListenerObj, onopen, onerror, 
 		// create a new random message id
 		
 		var time = (new Date()).getTime();
-		if (time - lastSendTime < 400 && time - lastTime < 100)
+		if (time - lastSendTime < sendRate)
 		{
+			clearTimeout(delayedUpdated);
+			delayedUpdated = setTimeout(function() {
+				updateListenerObj.changed(pan, tilt);
+			});
 			return;
 		}
 		lastSendTime = time;
-		lastTime = time;
 
 		//prepare json data
 		var msg = {
@@ -62,12 +66,6 @@ function initWebsocketConnection(onmessage, updateListenerObj, onopen, onerror, 
 		{
 			return;
 		}
-		var time = (new Date()).getTime();
-		if (time - lastTime < 100)
-		{
-			return;
-		}
-		lastTime = time;
 
 		onmessage(pan, tilt, remote);
 	};
