@@ -3,6 +3,7 @@ require_once(dirname(__FILE__)."/debug.php");
 define_global_vars();
 require_once(dirname(__FILE__)."/common_functions.php");
 require_once(dirname(__FILE__)."/../objects/user.php");
+require_once(dirname(__FILE__)."/../root.php");
 function define_global_vars() {
 	global $maindb;
 	global $global_user;
