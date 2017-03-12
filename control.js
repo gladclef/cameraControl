@@ -100,10 +100,10 @@ function initCrosshairs()
 		updatePanTiltByPixel: function(x, y) {
 			var ratioX = canvas.width() / serverStats["pan_range"] / 2;
 			var offsetX = canvas.width() / 2;
-			crosshairs.pan = (x - offsetX) / ratioX;
+			crosshairs.pan = Math.floor((x - offsetX) / ratioX);
 			var ratioY = canvas.height() / serverStats["tilt_range"] / 2;
 			var offsetY = canvas.height() / 2;
-			crosshairs.tilt = (y - offsetY) / ratioY;
+			crosshairs.tilt = Math.floor((y - offsetY) / ratioY);
 		},
 		updateRemoteCrosshairs: function(remotePan, remoteTilt) {
 			crosshairs.remotePan = remotePan;
@@ -136,7 +136,8 @@ function update(e)
 
 function localUpdate(e)
 {
-	
+	update(e);
+	outgoingMessenger.changed(crosshairs.pan, crosshairs.tilt);
 }
 
 function initIncomingMessenger()
@@ -166,13 +167,7 @@ function initIncomingMessenger()
 
 function initOutgoingMessenger()
 {
-	var update1 = update;
 	outgoingMessenger = {};
-	update = function(e)
-	{
-		update1(e);
-		outgoingMessenger.changed(crosshairs.pan, crosshairs.tilt);
-	}
 }
 
 var delayInit;
@@ -189,11 +184,11 @@ delayInit = function()
 		initWebsocketConnection(incomingMessenger, outgoingMessenger);
 
 		canvas.click(function(e) {
-			update(e);
+			localUpdate(e);
 		});
 		canvas.mousemove(function(e) {
 			if (windowFocus && mouseDown) {
-				update(e);
+				localUpdate(e);
 			}
 		});
 		canvas[0].addEventListener("touchmove", (function(e) {
@@ -201,7 +196,7 @@ delayInit = function()
 				e = e.originalEvent || e;
 				e = e.targetTouches || e.changedTouches || e.touches || e;
 				e = e[0] || e["0"] || e;
-				update(e);
+				localUpdate(e);
 			}
 		}), false);
 	}

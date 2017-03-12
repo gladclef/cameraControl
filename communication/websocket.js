@@ -11,7 +11,7 @@ function initWebsocketConnection(onmessage, updateListenerObj, onopen, onerror, 
 	var myId = Math.floor(Math.random() * 10000);
 	var lastSendTime = 0;
 	var index = 0;
-	var sendRate = 200;
+	var sendRate = 50;
 	var delayedUpdated = null;
 	
 	if (onopen)
