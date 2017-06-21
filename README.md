@@ -1,5 +1,5 @@
 # Remote Camera Control
-A front-to-back solution for creating your own pan & tilt controlled camera (hardware not included).
+A front-to-back solution for creating your own pan & tilt controlled camera (batteries not included).
 
 # Inspiration
 Some buddies and I play DnD every weekend, but one of us plays remotely. We wanted a pan/tilt control camera for him so he could look at what he wanted, but all existing solutions either cost a lot of money or only had 170 degrees of rotation. This DIY solution (can) cost a lot less and is fully customizable.
