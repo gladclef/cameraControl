@@ -1,4 +1,4 @@
-# cameraControl
+# Remote Camera Control
 A front-to-back solution for creating your own pan & tilt controlled camera (hardware not included).
 
 # Inspiration
