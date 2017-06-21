@@ -15,6 +15,7 @@ Some buddies and I play DnD every weekend, but one of us plays remotely. We want
 * Arduino and USB cable (I use an Arduino Uno)
 * computer client with Python3
 * motor assembly and necessary peripherals
+* webcam
 
 # Server Setup
 1. Set up a MySQL database and user for the server.
