@@ -9,6 +9,7 @@ function define_global_vars() {
 	global $global_opened_db;
 	global $session_started;
 	global $global_path_to_jquery;
+	global $global_path_to_d3;
 	global $tab_init_function;
 	global $global_loaded_server_settings;
 	global $mysqli;
@@ -40,6 +41,11 @@ function define_global_vars() {
 		$global_path_to_jquery = $a_configs["global_path_to_jquery"];
 	} else {
 		print_debug_as_html_paragraph("global_path_to_jquery is not set in server_config.ini");
+	}
+	if (isset($a_configs["global_path_to_d3"])) {
+		$global_path_to_d3 = $a_configs["global_path_to_d3"];
+	} else {
+		print_debug_as_html_paragraph("global_path_to_d3 is not set in server_config.ini");
 	}
 	if (isset($a_configs["timezone"])) {
 		date_default_timezone_set($a_configs["timezone"]);

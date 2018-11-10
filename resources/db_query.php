@@ -2,6 +2,9 @@
 require_once(dirname(__FILE__)."/common_functions.php");
 require_once(dirname(__FILE__)."/globals.php");
 require_once(dirname(__FILE__)."/debug.php");
+
+global $global_opened_db;
+
 if ($global_opened_db === FALSE) {
 	if (open_db()) {
 		$global_opened_db = TRUE;
