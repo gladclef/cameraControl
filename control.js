@@ -5,6 +5,8 @@ var mouseDown;
 var incomingMessenger;
 var outgoingMessenger;
 
+if (window.a_toExec === undefined) window.a_toExec = [];
+
 function initWatchers()
 {
 	// from http://stackoverflow.com/questions/3479734/javascript-jquery-test-if-window-has-focus
@@ -170,11 +172,10 @@ function initOutgoingMessenger()
 	outgoingMessenger = {};
 }
 
-var delayInit;
-delayInit = function()
-{
-	if (jQuery && $("#canvas_container").length > 0)
-	{
+a_toExec[a_toExec.length] = {
+	"name": "main",
+	"dependencies": ["serverStats", "jQuery", "communication_websocket"],
+	"function": function() {
 		initCanvas();
 		initCrosshairs();
 		initWatchers();
@@ -200,9 +201,4 @@ delayInit = function()
 			}
 		}), false);
 	}
-	else
-	{
-		setTimeout(delayInit, 30);
-	}
-};
-delayInit();
+}

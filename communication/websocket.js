@@ -2,6 +2,7 @@
  * Much of this code comes from the chat server created by sanwebe:
  * https://www.sanwebe.com/downloads/50-websocket-example
  */
+window.communication_websocket = true;
 
 function initWebsocketConnection(onmessage, updateListenerObj, onopen, onerror, onclose)
 {
