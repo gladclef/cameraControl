@@ -1,4 +1,4 @@
-import websocket
+import websocket #pip install --user websocket-client==0.47.0
 import time
 import signal
 import ssl
@@ -12,6 +12,7 @@ class defaultWebsocketApp():
         self.on_message_handler = on_message_handler
 
     def signal_handler(self, signal, frame):
+        print("interrupted")
         self.close()
 
     def on_message(self, ws, message):

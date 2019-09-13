@@ -131,6 +131,7 @@ function update(e)
 {
 	var x = e.clientX || e.pageX;
 	var y = e.clientY || e.pageY;
+	console.log("x: " + x + ", y: " + y);
 	crosshairs.updatePanTiltByPixel(x, y);
 	crosshairs.updateImagePosition();
 	crosshairs.updateRemoteCrosshairs(serverStats["remotePan"], serverStats["remoteTilt"]);
@@ -173,8 +174,8 @@ function initOutgoingMessenger()
 }
 
 a_toExec[a_toExec.length] = {
-	"name": "main",
-	"dependencies": ["serverStats", "jQuery", "communication_websocket"],
+	"name": "control.js",
+	"dependencies": ["control.php", "jQuery", "pushPull.js"],
 	"function": function() {
 		initCanvas();
 		initCrosshairs();
@@ -182,7 +183,7 @@ a_toExec[a_toExec.length] = {
 		initIncomingMessenger();
 		initOutgoingMessenger();
 
-		initWebsocketConnection(incomingMessenger, outgoingMessenger);
+		initPushPull(incomingMessenger, outgoingMessenger);
 
 		canvas.click(function(e) {
 			localUpdate(e);

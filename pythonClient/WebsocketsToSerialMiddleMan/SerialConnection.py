@@ -1,5 +1,5 @@
-import serial.tools.list_ports
-import serial
+import serial.tools.list_ports #pip install --user serial
+import serial #pip install --user serial
 import time
 import winsound
 
@@ -39,7 +39,8 @@ class SerialConnection():
 	def connect(self):
 		try:
 			self.conn = serial.Serial(self.port, 9600)
-			self.tryRead()
+			#self.tryRead()
+			self.write("1:A")
 		except (ValueError, serial.SerialException) as err:
 			print("Error connecting to port " + self.port + " with serial.Serial")
 			print(err)

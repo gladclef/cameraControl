@@ -19,15 +19,19 @@ function init()
 	}
 }
 
-function getVals()
+function getVals($s_cameraName = "")
 {
 	global $cameraName;
 	global $maindb;
 
-	$where = ["name"=>"${cameraName}"];
+	if ($s_cameraName == "")
+		$s_cameraName = $cameraName;
+	$where = ["name"=>"${s_cameraName}"];
 	$retval = db_query("SELECT `pan`,`tilt`,`pan_range`,`tilt_range`,`remote_pan`,`remote_tilt` FROM `${maindb}`.`cameras` WHERE " . array_to_where_clause($where), $where);
+	if (!is_array($retval) || sizeof($retval) == 0)
+		return FALSE;
 	$retval = $retval[0];
-	$retval["name"] = $cameraName;
+	$retval["name"] = $s_cameraName;
 	return $retval;
 }
 
@@ -46,12 +50,14 @@ function printAsJSON()
 	echo json_encode($panTiltAndRange);
 }
 
-function setPanAndTilt($pan, $tilt, $remote = FALSE)
+function setPanAndTilt($pan, $tilt, $remote = FALSE, $s_cameraName = "")
 {
 	global $maindb;
 	global $cameraName;
 
 	// make sure the values don't exceed the limiting range values
+	if ($s_cameraName == "")
+		$s_cameraName = $cameraName;
 	$panTiltAndRange = getVals();
 	$pan = (int)$pan;
 	$tilt = (int)$tilt;
@@ -75,7 +81,9 @@ function setPanAndTilt($pan, $tilt, $remote = FALSE)
 	// update the variables
 	$where = ["name"=>"${cameraName}"];
 	$combined = array_merge($where, $updates);
-	db_query("UPDATE `${maindb}`.`cameras` SET " . array_to_update_clause($updates) . " WHERE " . array_to_where_clause($where), $combined);
+	$b_success = db_query("UPDATE `${maindb}`.`cameras` SET " . array_to_update_clause($updates) . " WHERE " . array_to_where_clause($where), $combined);
+	if ($b_success !== TRUE)
+		return FALSE;
 
 	// return the sanitized values
 	$sanitized["remote"] = $remote;

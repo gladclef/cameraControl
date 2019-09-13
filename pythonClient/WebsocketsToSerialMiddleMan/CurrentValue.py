@@ -2,7 +2,7 @@ import json
 import urllib.request
 
 class CurrentValue():
-	url = "http://bbean.us/small/cameraControl/index.php?printAsJSON"
+	url = "https://bbean.us/small/cameraControl/index.php?printAsJSON"
 	camera = {}
 
 	def __init__(self):
