@@ -90,6 +90,7 @@ function initPushPull(onmessage, updateListenerObj, onerror, onclose)
 		{
 			return;
 		}
+		index = messageIndex + 1;
 
 		onmessage(pan, tilt, remote);
 	};
