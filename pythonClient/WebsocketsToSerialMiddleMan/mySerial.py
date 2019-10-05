@@ -1,5 +1,5 @@
-import serial.tools.list_ports #pip install --user serial
-import serial #pip install --user serial
+import serial.tools.list_ports
+import serial
 import time
 import winsound
 
@@ -26,10 +26,9 @@ class SerialConnection():
 			for i in range(len(ports)):
 				print(str(i + 1) + ": " + str(ports[i]))
 			try:
-				choice = int(input(">> "))
-			except ValueError as err:
+				choice = int(raw_input(">> "))
+			except ValueError:
 				print("value must be an integer")
-				print(err)
 			if (choice < 1 or choice > len(ports)):
 				print("value must be between 1 and " + str(len(ports)))
 
@@ -39,30 +38,13 @@ class SerialConnection():
 	def connect(self):
 		try:
 			self.conn = serial.Serial(self.port, 9600)
-			#self.tryRead()
-			self.write("1:A")
-		except (ValueError, serial.SerialException) as err:
+			read()
+		except:
 			print("Error connecting to port " + self.port + " with serial.Serial")
-			print(err)
 			exit(1)
 
 	def getConnect(self):
 		return self.conn
-
-	def tryRead(self):
-		startTime = int(round(time.time() * 1000))
-		while (self.read() == 0):
-			time.sleep(0.01)
-			currTime = int(round(time.time() * 1000))
-			if (currTime - startTime > 10 * 1000):
-				print("connection error, try starting the program again")
-				for i in range(3):
-					winsound.Beep(440, 250)
-					time.sleep(0.25)
-				exit(1)
-		time.sleep(0.01)
-		while (self.read() > 0):
-			time.sleep(0.01)
 
 	def read(self):
 		count = self.conn.in_waiting
@@ -71,19 +53,29 @@ class SerialConnection():
 
 	def write(self, val):
 		byteval = val.encode(encoding="utf-8")
-		print("writing: " + str(byteval))
+		print("writing: " + byteval)
 		self.conn.write(byteval)
-		self.tryRead()
+
+		startTime = int(round(time.time() * 1000))
+		while (self.read() == 0):
+			time.sleep(0.1)
+			currTime = int(round(time.time() * 1000))
+			if (currTime - startTime > 10 * 1000):
+				print("connection error, try starting the program again")
+				for i in range(3):
+					winsound.Beep(440, 250)
+					time.sleep(0.25)
+				exit(1)
+			pass
+		pass
 
 	def setPan(self, relativePan):
 		absPan = int((relativePan + 1.0) * (255.0 / 2.0))
-		self.write("7:Cb09" + str(absPan).zfill(3))
+		self.write("7:Cb09" + str(absPan))
 
 	def setTilt(self, relativeTilt):
 		absTilt = int((relativeTilt + 1.0) * (255.0 / 2.0))
-		absTilt = int(absTilt / 255.0 * 70.0)
-		absTilt = (70 - absTilt) + 10
-		self.write("7:Cb10" + str(absTilt).zfill(3))
+		self.write("7:Cb10" + str(absTilt))
 
 if __name__ == "__main__":
 	serialConnection = SerialConnection()
@@ -98,4 +90,3 @@ if __name__ == "__main__":
 	time.sleep(1)
 	serialConnection.setPan(1)
 	time.sleep(1)
-	serialConnection.setPan(-1)

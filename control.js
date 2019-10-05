@@ -131,7 +131,7 @@ function update(e)
 {
 	var x = e.clientX || e.pageX;
 	var y = e.clientY || e.pageY;
-	console.log("x: " + x + ", y: " + y);
+	// console.log("x: " + x + ", y: " + y);
 	crosshairs.updatePanTiltByPixel(x, y);
 	crosshairs.updateImagePosition();
 	crosshairs.updateRemoteCrosshairs(serverStats["remotePan"], serverStats["remoteTilt"]);

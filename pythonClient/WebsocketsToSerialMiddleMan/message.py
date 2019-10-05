@@ -4,16 +4,20 @@ import time
 class Message():
 	pan = 0.0
 	tilt = 0.0
+	pan_range = 0.0
+	tilt_range = 0.0
 	clientId = 0
 	index = 0
 	time = 0
 
 	def __init__(self, msgJSON):
-		msg = json.loads(msgJSON)
+		msg = msgJSON#json.loads(msgJSON)
 		self.pan = float(msg["pan"])
 		self.tilt = float(msg["tilt"])
+		self.pan_range = float(msg["pan_range"])
+		self.tilt_range = float(msg["tilt_range"])
 		self.clientId = int(msg["clientId"])
-		self.messageIndex = int(msg["messageIndex"])
+		self.messageIndex = int(msg["message_idx"])
 		self.time = int(round(time.time() * 1000))
 
 	def getPan(self):
@@ -22,11 +26,11 @@ class Message():
 	def getTilt(self):
 		return self.tilt
 
-	def getRelativePan(self, panRange):
-		return self.pan / panRange
+	def getRelativePan(self):
+		return self.pan / self.pan_range#(self.pan + self.pan_range) / (self.pan_range * 2)
 
-	def getRelativeTilt(self, tiltRange):
-		return self.tilt / tiltRange
+	def getRelativeTilt(self):
+		return self.tilt / self.tilt_range#(self.tilt + self.tilt_range) / (self.tilt_range * 2)
 
 	def getClientId(self):
 		return self.clientId

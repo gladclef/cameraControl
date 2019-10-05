@@ -1,4 +1,4 @@
-import defaultWebsocketApp
+# import defaultWebsocketApp
 import CurrentValue
 import message
 import SerialConnection
@@ -6,19 +6,18 @@ import json
 import queue
 import time
 import threading
+import longPollClient
 
 class MessageHandler():
 	messageQueue = None
 	pan = 0.0
 	tilt = 0.0
-	currentValue = None
 	serialConnection = None
 	timer = None
 	lock = threading.Lock()
 
-	def __init__(self, currentValue, serialConnection):
+	def __init__(self, serialConnection):
 		self.messageQueue = queue.Queue()
-		self.currentValue = currentValue
 		self.serialConnection = serialConnection
 
 	def putMessage(self, msg):
@@ -28,12 +27,12 @@ class MessageHandler():
 			droppedMsg = self.messageQueue.get()
 		#print("queue size: " + str(self.messageQueue.qsize()) + ", dropped: " + str(droppedMsg))
 
-	def handleMessage(self, ws, msgStr):
-		print("received message, ", end='')
+	def handleMessage(self, msgStr):
+		# print("received message, ", end='')
 		msg = message.Message(msgStr)
-		self.pan = msg.getRelativePan(self.currentValue.getPanRange())
-		self.tilt = msg.getRelativeTilt(self.currentValue.getTiltRange())
-		print("pan=" + str(self.pan) + ", tilt=" + str(self.tilt))
+		self.pan = msg.getRelativePan()
+		self.tilt = msg.getRelativeTilt()
+		# print("pan=" + str(self.pan) + ", tilt=" + str(self.tilt))
 		self.putMessage(msg)
 		self.update()
 
@@ -53,7 +52,11 @@ class MessageHandler():
 if __name__ == "__main__":
 	serialConnection = SerialConnection.SerialConnection()
 	serialConnection.requestUserConnection()
-	cv = CurrentValue.CurrentValue()
-	handler = MessageHandler(cv, serialConnection)
-	app = defaultWebsocketApp.defaultWebsocketApp(handler.handleMessage)
-	app.start()
+	# cv = CurrentValue.CurrentValue()
+	handler = MessageHandler(serialConnection)
+	# app = defaultWebsocketApp.defaultWebsocketApp(handler.handleMessage)
+	# app.start()
+	lpc = longPollClient.longPollClient()
+	while (True):
+		point = lpc.getLatestPoint()
+		handler.handleMessage(point)

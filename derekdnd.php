@@ -27,7 +27,7 @@ function getVals($s_cameraName = "")
 	if ($s_cameraName == "")
 		$s_cameraName = $cameraName;
 	$where = ["name"=>"${s_cameraName}"];
-	$retval = db_query("SELECT `pan`,`tilt`,`pan_range`,`tilt_range`,`remote_pan`,`remote_tilt` FROM `${maindb}`.`cameras` WHERE " . array_to_where_clause($where), $where);
+	$retval = db_query("SELECT `pan`,`tilt`,`pan_range`,`tilt_range`,`remote_pan`,`remote_tilt`,`message_idx` FROM `${maindb}`.`cameras` WHERE " . array_to_where_clause($where), $where);
 	if (!is_array($retval) || sizeof($retval) == 0)
 		return FALSE;
 	$retval = $retval[0];
@@ -50,7 +50,7 @@ function printAsJSON()
 	echo json_encode($panTiltAndRange);
 }
 
-function setPanAndTilt($pan, $tilt, $remote = FALSE, $s_cameraName = "")
+function setPanAndTilt($pan, $tilt, $i_message_idx, $remote = FALSE, $s_cameraName = "")
 {
 	global $maindb;
 	global $cameraName;
@@ -67,7 +67,7 @@ function setPanAndTilt($pan, $tilt, $remote = FALSE, $s_cameraName = "")
 	$tilt = min(max($tilt, -$tilt_range), $tilt_range);
 
 	// get the variable names
-	$sanitized = ["pan"=>$pan, "tilt"=>$tilt];
+	$sanitized = ["pan"=>$pan, "tilt"=>$tilt, "message_idx"=>$i_message_idx];
 	$updates = array();
 	foreach ($sanitized as $k=>$v)
 	{

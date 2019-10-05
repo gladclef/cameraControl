@@ -49,3 +49,6 @@ Temporary Items
 cameraControl.sublime-project
 cameraControl.sublime-workspace
 sftp-config.json
+*.stl
+*.blend1
+test.blend

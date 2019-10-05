@@ -15,7 +15,7 @@ class ajax {
         $s_tilt = get_post_var("tilt");
         $s_camera = get_post_var("camera");
         $i_clientId = intval(get_post_var("clientId"));
-        $i_messageIndex = intval(get_post_var("messageIndex"));
+        $i_message_idx = intval(get_post_var("message_idx"));
         $i_pan = intval($s_pan);
         $i_tilt = intval($s_tilt);
         
@@ -34,7 +34,7 @@ class ajax {
             return "\"pan\" and \"tilt\" must be between +-${i_panRange} and ${i_tiltRange}, respectively";
 
         // update the database
-        $ab_success = setPanAndTilt($i_pan, $i_tilt, FALSE, $s_camera);
+        $ab_success = setPanAndTilt($i_pan, $i_tilt, $i_message_idx, FALSE, $s_camera);
         if ($ab_success === FALSE)
             return "failed to update database";
 
@@ -45,10 +45,12 @@ class ajax {
             if(is_resource($socket)) {
                 if (socket_connect($socket, "127.0.0.1", 12345)) {
                     $a_camera = getVals($s_camera);
+                    $a_camera['camera'] = $s_camera;
                     $a_camera['clientId'] = $i_clientId;
-                    $a_camera['messageIndex'] = $i_messageIndex;
-                    socket_write($socket, "subscribe ${s_camera}\n"); // used to register this client with the camera name
-                    socket_write($socket, json_encode($a_camera) . "\n");
+                    $a_camera['message_idx'] = $i_message_idx;
+                    $s_encoded = json_encode($a_camera);
+                    socket_write($socket, "subscribe ${s_encoded}\n"); // used to register this client with the camera name
+                    socket_write($socket, "${s_encoded}\n");
                     socket_write($socket, "disconnect\n");
                 } else {
                     error_log("Failed to connect to 127.0.0.1:12345 to propogate message");
@@ -84,6 +86,7 @@ class ajax {
 
         $s_camera = get_post_var("camera");
         $i_clientId = intval(get_post_var("clientId"));
+        $i_message_idx = intval(get_post_var("lastMessageId"));
         
         // validate parameters
         if ($s_camera != $cameraName)
@@ -97,7 +100,8 @@ class ajax {
         $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if(is_resource($socket)) {
             if (socket_connect($socket, "127.0.0.1", 12345)) {
-                socket_write($socket, "subscribe ${s_camera}\n");
+                $s_encoded = json_encode([ "camera"=>$s_camera, "message_idx"=>$i_message_idx ]);
+                socket_write($socket, "subscribe ${s_encoded}\n");
                 socket_set_option($socket,SOL_SOCKET, SO_RCVTIMEO, array("sec"=>60, "usec"=>0));
                 while (true) {
                     $s_ret = socket_read($socket, 2048);

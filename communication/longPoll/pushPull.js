@@ -6,10 +6,13 @@ function initPushPull(onmessage, updateListenerObj, onerror, onclose)
 	var addr = "https://bbean.us/small/cameraControl/communication/longPoll/server.php";
 	var myId = Math.floor(Math.random() * 10000);
 	var lastSendTime = 0;
-	var index = 0;
+	var index = parseInt(serverStats['message_idx']);
 	var sendRate = 50;
 	var delayedUpdated = null;
 	var pollXhrs = [];
+	var pushTimer = null;
+	var pushVals = {};
+	var startTime = Date.now();
 
 	window.addEventListener("beforeunload", function (e) {
 		for (var i = 0; i < pollXhrs.length; i++) {
@@ -18,6 +21,44 @@ function initPushPull(onmessage, updateListenerObj, onerror, onclose)
 			}
 		}
 	});
+
+	pushData = function()
+	{
+		pushTimer = null;
+		$.ajax({
+			url: addr,
+			async: true,
+			cache: false,
+			data: pushVals,
+			type: "POST",
+			timeout: 10000,
+			success: function(data) {
+				if (data == "success") {
+					// console.log("remote position updated");
+				} else {
+					console.error("Error! " + data);
+				}
+			},
+			error: function(xhr, ajaxOptions, thrownError) {
+				if (parseInt(xhr.status) == 0 && thrownError) {
+					if ((thrownError+"").indexOf("NETWORK_ERR") > -1) {
+						console.error("network error encountered");
+						return;
+					}
+				}
+				console.error("Error sending request: ("+xhr.status+") "+thrownError);
+			}
+		});
+	};
+
+	schedulePushData = function(data)
+	{
+		if (pushTimer === null)
+		{
+			pushTimer = setTimeout(pushData, 200);
+		}
+		pushVals = data;
+	};
 
 	updateListenerObj.changed = function(pan, tilt)
 	{
@@ -35,6 +76,7 @@ function initPushPull(onmessage, updateListenerObj, onerror, onclose)
 		lastSendTime = time;
 
 		//prepare json data
+		index += 1;
 		var data = {
 			command: "setPanTilt",
 			pan: pan,
@@ -42,54 +84,30 @@ function initPushPull(onmessage, updateListenerObj, onerror, onclose)
 			camera: "Derek DnD",
 			remote : false,
 			clientId: myId,
-			messageIndex : index
+			message_idx : index
 		};
-		index += 1;
 
 		//convert and send data to server
-		$.ajax({
-			url: addr,
-			async: true,
-			cache: false,
-			data: data,
-			type: "POST",
-			timeout: 10000,
-			success: function(data) {
-				if (data == "success") {
-					console.log("remote position updated");
-				} else {
-					console.error("Error! " + data);
-				}
-			},
-			error: function(xhr, ajaxOptions, thrownError) {
-				if (parseInt(xhr.status) == 0 && thrownError) {
-					if ((thrownError+"").indexOf("NETWORK_ERR") > -1) {
-						console.error("network error encountered");
-						return;
-					}
-				}
-				console.error("Error sending request: ("+xhr.status+") "+thrownError);
-			}
-		});
+		schedulePushData(data);
 	};
 	
-	var lastMsgIdx = 0;
 	var parseData = function(msg) {
 		var msg = JSON.parse(msg); //PHP sends Json data
 		var pan = msg.pan;
 		var tilt = msg.tilt;
 		var remote = msg.remote;
-		var messageIndex = msg.messageIndex;
+		var message_idx = msg.message_idx;
 		var clientId = msg.clientId;
 
 		if (clientId == myId)
 		{
 			return;
 		}
-		if (messageIndex <= lastMsgIdx)
+		if (message_idx <= index)
 		{
 			return;
 		}
+		index = message_idx;
 
 		onmessage(pan, tilt, remote);
 	};
@@ -102,7 +120,8 @@ function initPushPull(onmessage, updateListenerObj, onerror, onclose)
 			var data = {
 				command: "subscribePanTilt",
 				camera: "Derek DnD",
-				clientId: myId
+				clientId: myId,
+				lastMessageId: index
 			};
 
 			// send ajax request
@@ -131,5 +150,5 @@ function initPushPull(onmessage, updateListenerObj, onerror, onclose)
 			pollXhrs[0] = jqXHR;
 		}
 	};
-	setInterval(pollData, 100);
+	setInterval(pollData, 10);
 }
